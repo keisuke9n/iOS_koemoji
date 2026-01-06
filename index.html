@@ -1,126 +1,476 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="『こえもじ』は、音声認識でリアルタイムに文字を表示するiOSアプリ。高齢者や視覚支援にも最適。使いやすく広告対応済み。">
-  <meta name="keywords" content="音声認識, iOSアプリ, 高齢者支援, 視覚支援, 大きな文字, AdMob, こえもじ, Voice to Text">
-  <meta name="author" content="Keisuke Nakashima">
-  <title>こえもじ - 音声で文字を表示するアプリ</title>
-  <style>
-    body {
-      font-family: 'Helvetica Neue', sans-serif;
-      line-height: 1.8;
-      color: #222;
-      background: #f9f9f9;
-      padding: 2em;
-      max-width: 800px;
-      margin: auto;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metamorph こえもじ｜リアルタイム音声 → 大きな文字表示アプリ</title>
+    <meta name="description" content="Metamorph こえもじは、音声をリアルタイムで文字化し、大きな文字で表示する iOS アプリ。高齢者や聴覚障害者支援向け、簡単操作・iPad 対応。">
+    
+    <!-- OGP -->
+    <meta property="og:title" content="こえもじ｜音声をそのまま大きな文字に">
+    <meta property="og:description" content="音声をリアルタイムで文字表示。高齢者や視覚支援にやさしいiOSアプリ。">
+    <meta property="og:image" content="https://keisuke9n.github.io/iOS_koemoji/koemoji.png">
+    <meta property="og:type" content="website">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "こえもじ by Metamorph",
+      "operatingSystem": "iOS",
+      "applicationCategory": "AssistiveTechnology",
+      "url": "https://keisuke9n.github.io",
+      "creator": {
+        "@type": "Organization",
+        "name": "Metamorph"
+      },
+      "description": "音声をリアルタイムで文字化する iOS アプリ"
     }
-
-    h1, h2 {
-      color: #0055cc;
-    }
-
-    h1 {
-      font-size: 2em;
-      border-bottom: 2px solid #0055cc;
-      padding-bottom: 0.3em;
-    }
-
-    a {
-      color: #0055cc;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    section {
-      margin-bottom: 2em;
-    }
-
-    footer {
-      margin-top: 3em;
-      font-size: 0.9em;
-      color: #777;
-    }
-
-    img {
-      width: 100%;
-      max-width: 600px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-  </style>
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #fff;
+        }
+        
+        /* Header */
+        header {
+            background: #fff;
+            border-bottom: 2px solid #f0f0f0;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .logo img {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        nav ul {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: #0066cc;
+        }
+        
+        /* Hero Section */
+        .hero {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        .hero-content h1 {
+            font-size: 48px;
+            line-height: 1.3;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+        
+        .hero-subtitle {
+            font-size: 24px;
+            color: #555;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .hero-tags {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        
+        .tag {
+            background: #f0f7ff;
+            color: #0066cc;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #0066cc;
+            color: #fff;
+            padding: 1rem 2rem;
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: background 0.3s;
+        }
+        
+        .cta-button:hover {
+            background: #0052a3;
+        }
+        
+        .hero-image {
+            text-align: center;
+        }
+        
+        .hero-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        
+        /* Features Section */
+        .features {
+            background: #f8f9fa;
+            padding: 5rem 2rem;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 40px;
+            margin-bottom: 3rem;
+            color: #1a1a1a;
+        }
+        
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+        
+        .feature-card {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+        
+        .feature-card p {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.7;
+        }
+        
+        /* About Section */
+        .about {
+            max-width: 1200px;
+            margin: 5rem auto;
+            padding: 2rem;
+        }
+        
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        .about-text h2 {
+            font-size: 40px;
+            margin-bottom: 2rem;
+            color: #1a1a1a;
+        }
+        
+        .about-text p {
+            font-size: 20px;
+            color: #555;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+        
+        .about-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        
+        /* Download Section */
+        .download {
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: #fff;
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+        
+        .download h2 {
+            font-size: 40px;
+            margin-bottom: 2rem;
+        }
+        
+        .download p {
+            font-size: 24px;
+            margin-bottom: 3rem;
+            opacity: 0.95;
+        }
+        
+        .download .cta-button {
+            background: #fff;
+            color: #0066cc;
+            font-size: 22px;
+        }
+        
+        .download .cta-button:hover {
+            background: #f0f7ff;
+        }
+        
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 3rem 2rem 2rem;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-section h3 {
+            font-size: 20px;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 16px;
+            line-height: 2;
+            transition: color 0.3s;
+        }
+        
+        .footer-section a:hover {
+            color: #fff;
+        }
+        
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                margin: 2rem auto;
+            }
+            
+            .hero-content h1 {
+                font-size: 32px;
+            }
+            
+            .hero-subtitle {
+                font-size: 18px;
+            }
+            
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+            
+            nav ul {
+                display: none;
+            }
+            
+            .section-title {
+                font-size: 28px;
+            }
+            
+            .feature-card h3 {
+                font-size: 20px;
+            }
+            
+            .feature-card p {
+                font-size: 16px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <a href="#" class="logo">
+                <img src="https://keisuke9n.github.io/iOS_koemoji/koemoji.png" alt="こえもじ iOSアプリの公式アイコン">
+                <span class="logo-text">こえもじ</span>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="https://apps.apple.com/us/app/%E3%81%93%E3%81%88%E3%82%82%E3%81%98/id6746428538" target="_blank" rel="noopener">ダウンロード</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-  <h1>こえもじ - 音声で文字入力</h1>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>声が、文字になる<br>すぐに見えて、つながる。</h1>
+            <p class="hero-subtitle">音声をリアルタイムで文字化し、大きな文字で表示。高齢者や聴覚障害者にやさしいiOSアプリ。</p>
+            <div class="hero-tags">
+                <span class="tag">音声認識</span>
+                <span class="tag">大きい文字</span>
+                <span class="tag">カスタマイズ可能</span>
+                <span class="tag">iPad対応</span>
+            </div>
+            <a href="#download" class="cta-button">
+                <span>📱</span>
+                App Storeからダウンロード
+            </a>
+        </div>
+        <div class="hero-image">
+            <img src="https://keisuke9n.github.io/iOS_koemoji/koemoji.avif" 
+                 alt="音声をリアルタイムで文字表示するiOSアプリ『こえもじ』の画面" 
+                 loading="eager">
+        </div>
+    </section>
 
-  <section>
-    <p><strong>『こえもじ』</strong>は、音声を入力することでリアルタイムに文字として大きく表示するiOS向け無料アプリです。</p>
-    <p>高齢者や視覚支援が必要な方、病院などでのコミュニケーション支援など、さまざまなシーンで活躍を意図しました。</p>
-    <ul>
-      <li>🎤 音声認識で即時テキスト化</li>
-      <li>🔍 文字サイズ・背景色・フォント選択が可能</li>
-      <li>🖥 iPadにも最適化されたシンプルUI</li>
-      <li>📱 録音中は赤、待機中は青のマイクボタンで分かりやすい</li>
-      <li>🧩 Google AdMobによる広告表示で無償提供</li>
-    </ul>
-  </section>
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <h2 class="section-title">主な機能</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎤</div>
+                <h3>リアルタイム音声文字化</h3>
+                <p>話した言葉をその場で文字に変換。遅延なく、スムーズに表示されます。会話のサポートに抜群です。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>見やすい大きな文字</h3>
+                <p>文字サイズを自由に調整可能。高齢者や視覚に配慮が必要な方でも、はっきりと読むことができます。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>背景カラー切替</h3>
+                <p>明るい場所や暗い場所でも見やすいよう、背景色を変更できます。環境に合わせて見やすくできます。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💡</div>
+                <h3>シンプルな操作</h3>
+                <p>複雑な設定は不要。タップするだけで音声入力が始まります。誰でも迷わず使える設計です。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📲</div>
+                <h3>iPad最適化</h3>
+                <p>大画面iPadに対応。病院や介護施設でのコミュニケーション支援ツールとして活用できます。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>プライバシー重視</h3>
+                <p>音声データは端末内で処理され、外部に送信されません。安心してご利用いただけます。</p>
+            </div>
+        </div>
+    </section>
 
-  <section>
-    <h2>アプリ画面の一例</h2>
-    <img src="koemoji.avif" alt="こえもじアプリのスクリーンショット">
-  </section>
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>こえもじについて</h2>
+                <p>こえもじは、音声をリアルタイムで文字に変換し、大きく見やすく表示するiOSアプリです。</p>
+                <p>高齢者の方、聴覚に配慮が必要な方、病院や介護現場でのコミュニケーション補助など、幅広いシーンで活用いただけます。</p>
+                <p>Metamorphは、テクノロジーの力で人と人とのコミュニケーションを支援し、安心して会話を楽しめる社会の実現を目指しています。</p>
+            </div>
+            <div class="about-image">
+                <img src="https://keisuke9n.github.io/iOS_koemoji/koemoji.avif" 
+                     alt="音声をリアルタイムで文字表示するiOSアプリ『こえもじ』の画面">
+            </div>
+        </div>
+    </section>
 
-  <h1>プライバシーポリシー</h1>
+    <!-- Download Section -->
+    <section id="download" class="download">
+        <h2>今すぐ無料でダウンロード</h2>
+        <p>iPhone・iPadで、声を文字に変えるコミュニケーションを始めましょう。</p>
+        <a href="https://apps.apple.com/us/app/%E3%81%93%E3%81%88%E3%82%82%E3%81%98/id6746428538" target="_blank" rel="noopener" class="cta-button">
+            App Storeでダウンロード
+        </a>
+        <p style="margin-top: 2rem; font-size: 18px; opacity: 0.9;">推奨環境：iOS 15.6以降 / iPhone・iPad対応</p>
+    </section>
 
-  <section>
-    <p>「こえもじ」は、個人開発された無料のアプリです。本サービスは現状のままで提供され、個人情報の収集、利用、および開示に関する方針を以下に記します。</p>
-  </section>
+    <!-- Footer -->
+    <footer>
 
-  <section>
-    <h2>情報の収集と利用</h2>
-    <p>本アプリは、音声認識を通じてユーザーの利便性を向上させますが、個人を特定する情報は一切収集しません。ただし、アプリの改善や広告表示のために、以下の第三者サービスを利用する可能性があります。</p>
-  </section>
-
-  <section>
-    <h2>広告と第三者サービス</h2>
-    <p>本アプリは <strong>Google AdMob</strong> を用いて広告を表示しています。AdMobは、広告の効果測定および不正防止のために、匿名のデータ（例：IPアドレス、デバイス情報など）を収集することがあります。</p>
-    <p>Googleのデータの取り扱いについては、<a href="https://policies.google.com/privacy" target="_blank">Google プライバシーポリシー</a>をご確認ください。</p>
-  </section>
-
-  <section>
-    <h2>ログデータ</h2>
-    <p>アプリの不具合やクラッシュが発生した場合、エラー情報（ログデータ）としてデバイス名、OSのバージョン、使用時間などが自動的に記録されることがあります。これらの情報はアプリの改善目的で使用されます。</p>
-  </section>
-
-  <section>
-    <h2>セキュリティ</h2>
-    <p>ユーザーの情報保護のため、商用水準で妥当な対策を講じますが、インターネット上のデータ送信や保管方法において完全な安全性は保証できません。</p>
-  </section>
-
-  <section>
-    <h2>お子様のプライバシー</h2>
-    <p>本アプリは13歳未満のお子様を対象としておらず、意図的に個人情報を収集することはありません。保護者の方でお子様が情報を提供したと思われる場合は、速やかにご連絡ください。</p>
-  </section>
-
-  <section>
-    <h2>ポリシーの変更</h2>
-    <p>本プライバシーポリシーは、必要に応じて改訂される場合があります。変更後の内容は本ページにてお知らせいたします。</p>
-  </section>
-
-  <section>
-    <h2>お問い合わせ</h2>
-    <p>ご不明点やご意見がありましたら、以下までご連絡ください。</p>
-    <p>Email: <a href="mailto:keisuke9n@gmail.com">keisuke9n@gmail.com</a></p>
-  </section>
-
-  <footer>
-    <p>© 2025 Keisuke Nakashima, All rights reserved.</p>
-  </footer>
+        <div class="footer-bottom">
+            <p>© 2026 Metamorph All Rights Reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>
